@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sunjiayuan.mapper.TbConferenceMapper">
+  <resultMap id="BaseResultMap" type="com.sunjiayuan.pojo.TbConference">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="code" jdbcType="INTEGER" property="code" />
+    <result column="louhao" jdbcType="VARCHAR" property="louhao" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="v1" jdbcType="VARCHAR" property="v1" />
+    <result column="v2" jdbcType="VARCHAR" property="v2" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, code, louhao, status, v1, v2
+  </sql>
+  <select id="selectByExample" parameterType="com.sunjiayuan.pojo.TbConferenceExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from tb_conference
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from tb_conference
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from tb_conference
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.sunjiayuan.pojo.TbConferenceExample">
+    delete from tb_conference
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.sunjiayuan.pojo.TbConference">
+    insert into tb_conference (id, code, louhao, 
+      status, v1, v2)
+    values (#{id,jdbcType=BIGINT}, #{code,jdbcType=INTEGER}, #{louhao,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{v1,jdbcType=VARCHAR}, #{v2,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.sunjiayuan.pojo.TbConference">
+    insert into tb_conference
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="code != null">
+        code,
+      </if>
+      <if test="louhao != null">
+        louhao,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="v1 != null">
+        v1,
+      </if>
+      <if test="v2 != null">
+        v2,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="code != null">
+        #{code,jdbcType=INTEGER},
+      </if>
+      <if test="louhao != null">
+        #{louhao,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="v1 != null">
+        #{v1,jdbcType=VARCHAR},
+      </if>
+      <if test="v2 != null">
+        #{v2,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.sunjiayuan.pojo.TbConferenceExample" resultType="java.lang.Long">
+    select count(*) from tb_conference
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update tb_conference
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.code != null">
+        code = #{record.code,jdbcType=INTEGER},
+      </if>
+      <if test="record.louhao != null">
+        louhao = #{record.louhao,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.v1 != null">
+        v1 = #{record.v1,jdbcType=VARCHAR},
+      </if>
+      <if test="record.v2 != null">
+        v2 = #{record.v2,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update tb_conference
+    set id = #{record.id,jdbcType=BIGINT},
+      code = #{record.code,jdbcType=INTEGER},
+      louhao = #{record.louhao,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=INTEGER},
+      v1 = #{record.v1,jdbcType=VARCHAR},
+      v2 = #{record.v2,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sunjiayuan.pojo.TbConference">
+    update tb_conference
+    <set>
+      <if test="code != null">
+        code = #{code,jdbcType=INTEGER},
+      </if>
+      <if test="louhao != null">
+        louhao = #{louhao,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="v1 != null">
+        v1 = #{v1,jdbcType=VARCHAR},
+      </if>
+      <if test="v2 != null">
+        v2 = #{v2,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sunjiayuan.pojo.TbConference">
+    update tb_conference
+    set code = #{code,jdbcType=INTEGER},
+      louhao = #{louhao,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      v1 = #{v1,jdbcType=VARCHAR},
+      v2 = #{v2,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

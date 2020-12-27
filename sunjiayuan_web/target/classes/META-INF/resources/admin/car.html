@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>管理</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+	<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    
+    <script type="text/javascript" src="../plugins/angularjs/angular.min.js">  </script>
+    <!-- 分页组件开始 -->
+	<script src="../plugins/angularjs/pagination.js"></script>
+	<link rel="stylesheet" href="../plugins/angularjs/pagination.css">
+	<!-- 分页组件结束 -->
+    
+    
+    <script type="text/javascript" src="../js/base_pagination.js">  </script>
+    <script type="text/javascript" src="../js/service/carService.js">  </script>
+    <script type="text/javascript" src="../js/controller/baseController.js">  </script>
+<script>
+    //控制层
+    app.controller('carController' ,function($scope,$controller,$http   ,carService){
+
+        $controller('baseController',{$scope:$scope});//继承
+
+        //读取列表数据绑定到表单中
+        $scope.findAll=function(){
+            carService.findAll().success(
+                function(response){
+                    $scope.list=response;
+                }
+            );
+        }
+
+        //分页
+        $scope.findPage=function(page,rows){
+            carService.findPage(page,rows).success(
+                function(response){
+                    $scope.list=response.rows;
+                    $scope.paginationConf.totalItems=response.total;//更新总记录数
+                }
+            );
+        }
+
+        //查询实体
+        $scope.findOne=function(id){
+            carService.findOne(id).success(
+                function(response){
+                    $scope.entity= response;
+                }
+            );
+        }
+
+        //保存
+        $scope.save=function(){
+            var serviceObject;//服务层对象
+            if($scope.entity.id!=null){//如果有ID
+                serviceObject=carService.update( $scope.entity ); //修改
+            }else{
+                serviceObject=carService.add( $scope.entity  );//增加
+            }
+            serviceObject.success(
+                function(response){
+                    if(response.success){
+                        //重新查询
+                        $scope.reloadList();//重新加载
+                    }else{
+                        alert(response.message);
+                    }
+                }
+            );
+        }
+
+
+        //批量删除
+        $scope.dele=function(){
+            //获取选中的复选框
+            carService.dele( $scope.selectIds ).success(
+                function(response){
+                    if(response.success){
+                        $scope.reloadList();//刷新列表
+                        $scope.selectIds=[];
+                    }
+                }
+            );
+        }
+
+        $scope.searchEntity={};//定义搜索对象
+
+        //搜索
+        // $scope.search=function(page,rows){
+        //     carService.search(page,rows,$scope.searchEntity).success(
+        //         function(response){
+        //             $scope.list=response.rows;
+        //             $scope.paginationConf.totalItems=response.total;//更新总记录数
+        //         }
+        //     );
+        // }
+        $scope.GetRequest=function(name) {
+            var url = window.parent.location.search; //获取url中"?"符后的字串
+            // var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                if(str.indexOf("#" != -1)){
+                    str = str.substr(0);
+                }
+                strs = str.split("&");
+                for(var i = 0; i < strs.length; i ++) {
+                    if(strs[i].indexOf(name) != -1){
+                        return strs[i].split("=")[1];
+                    }
+                }
+            }
+            return null;
+        }
+
+
+
+        //根据跳转传递过来的   商品ID   pid ，然后把商品添加到购物车reids中
+        $scope.addCar=function () {
+            //获取   ？  后面传递过来的 pid
+            alert("获取参数:"+$scope.GetRequest("pid")+$scope.GetRequest("username"));
+
+            $http.get('/car/addCar.do?gid='+$scope.GetRequest("pid")+'&name='+$scope.GetRequest("username")).success(function (response) {
+                $scope.list = response;
+                alert(JSON.stringify($scope.list));
+            })
+        }
+
+
+        $scope.addRedis = function () {
+            $http.get("/car/addRedis.do").success(function (response) {
+                if (response){
+                    window.location.href="http://localhost:8081/login.html"
+                }
+            })
+        }
+        $scope.getUser = function () {
+            $http.get('/user/getUser.do').success(function (response) {
+                $scope.user = response;
+            })
+        }
+        $scope.tologin = function () {
+            window.location.href="http://localhost:8081/login.html"
+        }
+        $scope.carList =[]
+        $scope.addcarList = function ($event,entity) {
+            if($event.target.checked){
+                $scope.carList.push(entity);
+            }else {
+                $scope.carList.splice($scope.carList.indexOf(entity),1);
+            }
+            $scope.totalprice = 0;
+            for (var i in $scope.carList){
+                $scope.totalprice +=$scope.carList[i].totalprice;
+            }
+        }
+        $scope.addCars = function () {
+            $http.post("/car/addCars.do",$scope.carList).success(function (response) {
+                if(response.success){
+                    window.location.href = "/admin/car_table.html";
+                }else {
+                    alert(response.message);
+                }
+            })
+        }
+
+
+
+    });
+
+</script>
+</head>
+<body class="hold-transition skin-red sidebar-mini" ng-app="sunjiayuan" ng-controller="carController" ng-init="getUser();addCar()">
+  <!-- .box-body -->
+                    <div class="box-header with-border">
+                        <h3 class="box-title">管理{{carList}}</h3>
+                        <h3>{{totalprice}}</h3>
+                    </div>
+
+                    <div class="box-body">
+
+                        <!-- 数据表格 -->
+                        <div class="table-box">
+
+                            <!--工具栏-->
+                            <div class="pull-left">
+                                <div class="form-group form-inline">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default" title="新建" data-toggle="modal" data-target="#editModal" ng-click="entity={}"><i class="fa fa-file-o"></i> 新建</button>
+                                        <button type="button" class="btn btn-default" title="删除" ng-click="dele()"><i class="fa fa-trash-o"></i> 删除</button>           
+                                        <button type="button" class="btn btn-default" title="刷新" onclick="window.location.reload();"><i class="fa fa-refresh"></i> 刷新</button>
+                                        <button ng-click="tologin()">保存购物车</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="box-tools pull-right">
+                                <div class="has-feedback">							       
+                                </div>
+                            </div>
+                            <!--工具栏/-->
+
+			                  <!--数据列表-->
+			                  <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+			                      <thead>
+			                          <tr>
+			                              <th class="" style="padding-right:0px">
+
+			                              </th> 
+										                               <th class="sorting"></th>			
+                             <th class="sorting">用户id</th>			
+                             <th class="sorting">用户名</th>			
+                             <th class="sorting">商品id</th>			
+                             <th class="sorting">商品名称</th>			
+                             <th class="sorting">商品数量</th>			
+                             <th class="sorting">商品价格</th>			
+                             <th class="sorting">总价</th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+                             <th class="sorting"></th>			
+								     				
+					                      <th class="text-center">操作</th>
+			                          </tr>
+			                      </thead>
+			                      <tbody>
+			                          <tr ng-repeat="entity in list">
+			                              <td><input  type="checkbox" ng-click="addcarList($event,entity)"></td>
+				                                                       <td>{{entity.id}}</td>			
+                             <td>{{entity.uid}}</td>			
+                             <td>{{entity.username}}</td>			
+                             <td>{{entity.gid}}</td>			
+                             <td>{{entity.name}}</td>			
+                             <td>{{entity.num}}</td>			
+                             <td>{{entity.price}}</td>			
+                             <td>{{entity.totalprice}}</td>			
+
+		                                 
+		                                  <td class="text-center">
+
+
+		                                  </td>
+			                          </tr>									 
+			                      </tbody>
+			                  </table>
+                            <span ng-if="user.username==undefined">
+                                                  <button ng-click="tologin()">结账</button>
+                                              </span>
+                            <span ng-if="user.username!=undefined">
+		                                 	  <button type="button" ng-click="addCars()">结账 </button>总计{{totalprice}}
+                                              </span>
+			                  <!--数据列表/-->                        
+                        </div>
+                        <!-- 数据表格 /-->
+                        <!-- 分页 -->
+                     </div>
+                    <!-- /.box-body -->
+         
+<!-- 编辑窗口 -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" >
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 id="myModalLabel">编辑</h3>
+		</div>
+		<div class="modal-body">	
+			 <table class="table table-bordered table-striped"  width="800px">			
+		      	  		      	<tr>
+                             
+<td>用户id</td>
+
+                             <td><input  class="form-control" ng-model="entity.uid" placeholder="用户id" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>用户名</td>
+
+                             <td><input  class="form-control" ng-model="entity.username" placeholder="用户名" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>商品id</td>
+
+                             <td><input  class="form-control" ng-model="entity.gid" placeholder="商品id" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>商品名称</td>
+
+                             <td><input  class="form-control" ng-model="entity.name" placeholder="商品名称" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>商品数量</td>
+
+                             <td><input  class="form-control" ng-model="entity.num" placeholder="商品数量" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>商品价格</td>
+
+                             <td><input  class="form-control" ng-model="entity.price" placeholder="商品价格" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td>总价</td>
+
+                             <td><input  class="form-control" ng-model="entity.totalprice" placeholder="总价" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.v1" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.v2" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.v3" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.d1" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.d2" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.i1" placeholder="" ></td>
+
+                        </tr>		
+		      	<tr>
+                             
+<td></td>
+
+                             <td><input  class="form-control" ng-model="entity.i2" placeholder="" ></td>
+
+                        </tr>		
+		  		      	
+			 </table>				
+		</div>
+		<div class="modal-footer">						
+			<button class="btn btn-success" data-dismiss="modal" aria-hidden="true" ng-click="save()">保存</button>
+			<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+		</div>
+	  </div>
+	</div>
+</div>
+   
+</body>
+</html>
